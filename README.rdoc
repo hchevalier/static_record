@@ -1,3 +1,115 @@
 = StaticRecord
 
-This project rocks and uses MIT-LICENSE.
+StaticRecord allows you to perform ActiveRecord-like queries over ruby files.
+
+Those files act as immutable database records that only developers can alter.
+
+You can use it when you need several files inheriting a base class.
+
+== Installation
+
+Add this to your Gemfile:
+
+  gem 'static_record', require: 'static_record'
+
+and run the bundle install command.
+
+The 'require' part is important so that Rails autoloads the library correctly.
+
+
+== Getting Started
+
+=== Base class
+
+Create your base class inheriting from StaticRecord::Base.
+
+  class Article < StaticRecord::Base
+    # Declare in which SQLite3 file "articles" will be store (db/static_<table>.sqlite3)
+    table       :articles
+
+    # Declare at which path "article" files can be found
+    path        Rails.root.join('app', 'models', 'articles', '**', '*.rb')
+
+    # Optionnal, declare which column can be used as the primary key (must be unique)
+    # .find will only be availble if a primary key is defined
+    primary_key :name
+
+    # Specify which "article" attributes can be queried over
+    columns     [:name, :author, :rank]
+  end
+
+At each application startup, an SQLite3 database will be created to store this class' children.
+
+=== Child class
+
+Create has many child class as you want.
+
+  class ArticleOne < Article
+    # Define the attributes that will be available for your StaticRecord queries
+    attribute :name, 'Article One'
+    attribute :author, 'The author'
+    attribute :rank, '2'
+
+    # Your class can be used as any other Ruby class
+    def initialize
+      @an_instance_variable
+      super
+    end
+
+    def my_instance_method
+    end
+
+    def self.my_class_method
+    end
+  end
+
+=== Queries
+
+In your code, you can perform queries like this one:
+
+Article.where(name: 'Article Two').or.where.not(author: ['Author 1', 'Author 2']).limit(2).offset(3)
+
+I tried to implement as many SQL functions wrappers that ActiveRecord provides as I could.
+
+There is still a lot of work before everything is available, but I chosed to release the 1.0.0.pre nevertheless.
+
+Here is a full list:
+* where
+  * supports Hash -> where(name: 'Name', author: 'Author')
+  * supports String -> where("name = 'Name'") or where("name = ?", 'Name') or where("name = :name", name: 'Name')
+* find (requires a primary key has been set)
+* find_by
+* not
+* or
+* all
+* take
+* first
+* last
+* limit
+* offset
+* order
+
+== IDs
+
+Records are being assigned an ID in the SQLite3 database when inserted.
+
+As the database is recreated at each application startup and IDs depend on the insertion order, I advise you to rely on another column if you want to hardcode a specific record somewhere in your app.
+
+== Questions?
+
+If you have any question or doubt regarding StaticRecord which you cannot find the solution to in the documentation, you can send me an email. I'll try to answer in less than 24 hours.
+
+== Bugs?
+
+If you find a bug please add an issue on GitHub or fork the project and send a pull request.
+
+== Development
+
+As StaticRecord is in active development and a full list of feature is already scheduled, I won't be accepting any feature-oriented pull requests before the 1.0.0 release (hopefully before mi-January).
+
+Here is what will be available soon:
+- Better documentation
+- Typed attributes
+- Foreign keys
+- Joins
+- Generators

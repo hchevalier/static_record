@@ -1,4 +1,4 @@
 module StaticRecord
-  module ApplicationHelper
+  module ApplicationHelper # :nodoc:
   end
 end

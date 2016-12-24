@@ -1,6 +1,5 @@
-class ArticleOne
-  @@attributes = {
-    name: 'Article One',
-    author: 'The author'
-  }
+class ArticleOne < Article
+  attribute :name, 'Article One'
+  attribute :author, 'The author'
+  attribute :rank, '2'
 end
