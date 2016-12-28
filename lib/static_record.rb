@@ -9,5 +9,5 @@ require 'static_record/models/querying'
 require 'static_record/models/relation'
 require 'static_record/models/base'
 
-module StaticRecord
+module StaticRecord # :nodoc:
 end

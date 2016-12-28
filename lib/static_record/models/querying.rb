@@ -20,6 +20,14 @@ module StaticRecord
           super
         end
       end
+
+      def respond_to_missing?(method_sym, include_private = false)
+        if Relation.new(nil, store: store).respond_to_missing?(method_sym, true)
+          true
+        else
+          super
+        end
+      end
     end
   end
 end

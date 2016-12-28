@@ -28,15 +28,29 @@ module StaticRecord
 
     def find(value)
       raise StaticRecord::NoPrimaryKey, 'No primary key have been set' if @primary_key.nil?
-      @result_type = :record unless value.is_a?(Array)
+      unless value.is_a?(Array)
+        @result_type = :record
+        @sql_limit = 1
+      end
       add_subclause(q: { :"#{@primary_key}" => value })
-      @sql_limit = 1 if @result_type == :record
-
       res = to_a
-      return res if @only_sql
 
-      raise StaticRecord::RecordNotFound, "Couldn't find all #{@store.singularize.capitalize} with '#{@primary_key.to_s}' IN #{value}" if @result_type == :array && res.size != value.size
-      raise StaticRecord::RecordNotFound, "Couldn't find #{@store.singularize.capitalize} with '#{@primary_key.to_s}'=#{value}" if @result_type == :record && res.nil?
+      unless @only_sql
+        case @result_type
+        when :array
+          if res.size != value.size
+            err = "Couldn't find all #{@store.singularize.capitalize} "\
+            "with '#{@primary_key}' IN #{value}"
+            raise StaticRecord::RecordNotFound, err
+          end
+        when :record
+          if res.nil?
+            err = "Couldn't find #{@store.singularize.capitalize} "\
+            "with '#{@primary_key}'=#{value}"
+            raise StaticRecord::RecordNotFound, err
+          end
+        end
+      end
 
       res
     end

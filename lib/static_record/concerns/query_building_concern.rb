@@ -14,7 +14,7 @@ module StaticRecord
     private
 
     def sql_select_from
-      sql = "SELECT #{@columns} FROM #{@table}"
+      "SELECT #{@columns} FROM #{@table}"
     end
 
     def sql_where
@@ -27,11 +27,11 @@ module StaticRecord
         ord_sql += ord_sql.empty? ? ' ORDER BY' : ', '
         case ord.class.name
         when Hash.name
-          ord_sql += ord.map { |k, v| " #{@table}.#{k.to_s} #{v.to_s.upcase}" }.join(',')
+          ord_sql += ord.map { |k, v| " #{@table}.#{k} #{v.to_s.upcase}" }.join(',')
         when Array.name
-          ord_sql += ord.map { |sym| " #{@table}.#{sym.to_s} ASC" }.join(',')
+          ord_sql += ord.map { |sym| " #{@table}.#{sym} ASC" }.join(',')
         when Symbol.name
-          ord_sql += " #{@table}.#{ord.to_s} ASC"
+          ord_sql += " #{@table}.#{ord} ASC"
         when String.name
           ord_sql += " #{ord}"
         end
@@ -67,18 +67,17 @@ module StaticRecord
     def where_clause_from_hash(clause, subquery)
       parts = subquery.keys.map do |key|
         value = subquery[key]
-        part = ''
         if value.is_a?(Array)
           # ex: where(name: ['John', 'Jack'])
           # use IN operator
           value.map! { |v| v =~ /^\d+$/ ? v : "\"#{v}\"" }
           inverse = 'NOT ' if clause[:operator] == :not_eq
-          part = "#{key.to_s} #{inverse}IN (#{value.join(',')})"
+          "#{key} #{inverse}IN (#{value.join(',')})"
         else
           # ex: where(name: 'John')
           # use = operator
           inverse = '!' if clause[:operator] == :not_eq
-          part = "#{key.to_s} #{inverse}= '#{value}'"
+          "#{key} #{inverse}= '#{value}'"
         end
       end
       parts.join(' AND ')

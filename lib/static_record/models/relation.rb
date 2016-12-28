@@ -47,6 +47,10 @@ module StaticRecord
       end
     end
 
+    def respond_to_missing?(method_sym, include_private = false)
+      include_private ? super : respond_to?(method_sym, include_private)
+    end
+
     private
 
     def chained_from(relation)
@@ -74,10 +78,15 @@ module StaticRecord
     def exec_request(expectancy = :result_set)
       return build_query if @only_sql
 
-      error = nil
+      dbname = Rails.root.join('db', "static_#{@store}.sqlite3").to_s
+      result = get_expected_result_from_database(dbname, expectancy)
+      cast_result(expectancy, result)
+    end
+
+    def get_expected_result_from_database(dbname, expectancy)
       result = nil
+
       begin
-        dbname = Rails.root.join('db', "static_#{@store}.sqlite3").to_s
         db = SQLite3::Database.open(dbname)
         if expectancy == :integer
           result = db.get_first_value(build_query)
@@ -95,6 +104,10 @@ module StaticRecord
 
       raise error if error
 
+      result
+    end
+
+    def cast_result(expectancy, result)
       if expectancy == :result_set
         case @result_type
         when :array
