@@ -1,5 +1,7 @@
 = StaticRecord
 
+{<img src="https://badge.fury.io/rb/static-record.svg" alt="Gem Version" />}[https://badge.fury.io/rb/static-record] {<img src="https://codeclimate.com/github/hchevalier/static_record/badges/gpa.svg" />}[https://codeclimate.com/github/hchevalier/static_record]
+
 StaticRecord allows you to perform ActiveRecord-like queries over ruby files.
 
 Those files act as immutable database records that only developers can alter.
