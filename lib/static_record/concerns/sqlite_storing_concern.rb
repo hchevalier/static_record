@@ -6,15 +6,15 @@ module StaticRecord
 
     module ClassMethods # :nodoc:
       def create_store
-        columns = class_variable_get(:@@_columns)
+        cols = class_variable_get(:@@_columns)
         begin
           dbname = Rails.root.join('db', "static_#{store}.sqlite3").to_s
           SQLite3::Database.new(dbname)
           db = SQLite3::Database.open(dbname)
           db.execute("DROP TABLE IF EXISTS #{store}")
-          create_table(db, columns)
+          create_table(db, cols)
           load_records.each_with_index do |record, index|
-            insert_into_database(db, record, index, columns)
+            insert_into_database(db, record, index, cols)
           end
         rescue SQLite3::Exception => e
           puts 'Exception occurred', e
@@ -25,16 +25,34 @@ module StaticRecord
 
       private
 
-      def create_table(db, columns)
-        cols = columns.map { |c| c.to_s + ' TEXT' }.join(', ')
-        sql = "CREATE TABLE #{store}(id INTEGER PRIMARY KEY, klass TEXT, #{cols})"
+      def create_table(db, cols)
+        attr_list = []
+        cols.each do |c, v|
+          attr_list << c.to_s + column_type_to_sql(v)
+        end
+        str_attr = attr_list.join(', ')
+        sql = "CREATE TABLE #{store}(id INTEGER PRIMARY KEY, klass TEXT, #{str_attr})"
         db.execute(sql)
       end
 
-      def insert_into_database(db, record, index, columns)
+      def column_type_to_sql(ctype)
+        case ctype.to_s
+        when 'string'
+          ' TEXT'
+        else
+          " #{ctype.to_s.upcase}"
+        end
+      end
+
+      def insert_into_database(db, record, index, cols)
         attrs = record.constantize.new.attributes
-        sqlized = [index.to_s, "'#{record}'"] # id, klass
-        sqlized += columns.map { |c| "'#{attrs[c]}'" } # model's attributes
+        # id, klass
+        sqlized = [index.to_s, "'#{record}'"]
+        # model's attributes
+        sqlized += cols.map do |name, ctype|
+          ctype == :integer ? attrs[name].to_s : "'#{attrs[name]}'"
+        end
+
         db.execute("INSERT INTO #{store} VALUES(#{sqlized.join(', ')})")
       end
 

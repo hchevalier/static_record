@@ -33,14 +33,22 @@ Create your base class inheriting from StaticRecord::Base.
     path        Rails.root.join('app', 'models', 'articles', '**', '*.rb')
 
     # Optionnal, declare which column can be used as the primary key (must be unique)
-    # .find will only be availble if a primary key is defined
+    # .find will only be available if a primary key is defined
     primary_key :name
 
-    # Specify which "article" attributes can be queried over
-    columns     [:name, :author, :rank]
+    # Specify which "article" attributes can be queried over with their types
+    columns     name:   :string,
+                author: :string,
+                rank:   :integer
   end
 
 At each application startup, an SQLite3 database will be created to store this class' children.
+
+Available column types are
+- :string
+- :integer
+- :boolean
+- :float
 
 === Child class
 
@@ -50,7 +58,7 @@ Create has many child class as you want.
     # Define the attributes that will be available for your StaticRecord queries
     attribute :name, 'Article One'
     attribute :author, 'The author'
-    attribute :rank, '2'
+    attribute :rank, 2
 
     # Your class can be used as any other Ruby class
     def initialize
@@ -69,17 +77,17 @@ Create has many child class as you want.
 
 In your code, you can perform queries like this one:
 
-Article.where(name: 'Article Two').or.where.not(author: ['Author 1', 'Author 2']).limit(2).offset(3)
+Article.where(name: 'Article Two').or.where('rank >= 2').limit(2).offset(3)
 
 I tried to implement as many SQL functions wrappers that ActiveRecord provides as I could.
 
-There is still a lot of work before everything is available, but I chosed to release the 1.0.0.pre nevertheless.
+There is still a lot of work before everything is available, but I chose to release the 1.0.0.pre nevertheless.
 
 Here is a full list:
 * where
   * supports Hash -> where(name: 'Name', author: 'Author')
   * supports String -> where("name = 'Name'") or where("name = ?", 'Name') or where("name = :name", name: 'Name')
-* find (requires a primary key has been set)
+* find (only if a primary key has been set)
 * find_by
 * not
 * or
@@ -111,7 +119,6 @@ As StaticRecord is in active development and a full list of feature is already s
 
 Here is what will be available soon:
 - Better documentation
-- Typed attributes
-- Foreign keys
+- Support for Date, Datetime and Foreign keys
 - Joins
 - Generators

@@ -11,6 +11,13 @@ module StaticRecord
       :@@_store
     ].freeze
 
+    KNOWN_TYPES = [
+      :string,
+      :boolean,
+      :integer,
+      :float
+    ].freeze
+
     def initialize
       attributes.each do |attr, value|
         instance_variable_set "@#{attr}", value
@@ -66,6 +73,10 @@ module StaticRecord
     def self.columns(cols)
       class_variable_set('@@_columns', cols)
       create_store
+    end
+
+    def self.get_column_type(column)
+      class_variable_get(:@@_columns)[column]
     end
   end
 end

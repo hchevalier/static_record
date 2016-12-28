@@ -12,6 +12,6 @@ RSpec.describe StaticRecord::Base, :type => :model do
     article = Article.find('Article One')
     expect(article.name).to eql('Article One')
     expect(article.author).to eql('The author')
-    expect(article.rank).to eql('2')
+    expect(article.rank).to eql(2)
   end
 end
