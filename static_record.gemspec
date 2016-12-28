@@ -34,6 +34,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '~> 12.0.0'
   s.add_development_dependency 'rspec', '~> 3.5'
   s.add_development_dependency 'rspec-rails', '~> 3.5'
+  # Test coverage
+  s.add_development_dependency 'simplecov'
+  s.add_development_dependency 'codeclimate-test-reporter', '~> 1.0.0'
   # Coding style
   s.add_development_dependency 'rubocop', '~> 0.46.0'
 end
