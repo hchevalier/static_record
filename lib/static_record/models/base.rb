@@ -11,6 +11,16 @@ module StaticRecord
       :@@_store
     ].freeze
 
+    def initialize
+      attributes.each do |attr, value|
+        instance_variable_set "@#{attr}", value
+        self.class.class_eval do
+          attr_accessor :"#{attr}"
+        end
+      end
+      super
+    end
+
     def self.attribute(name, value)
       err = RESERVED_ATTRIBUTES.include?("@@#{name}".to_sym)
       raise StaticRecord::ReservedAttributeName, "#{name} is a reserved name" if err

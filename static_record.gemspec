@@ -7,12 +7,12 @@ Gem::Specification.new do |s|
   s.version     = StaticRecord::VERSION
   s.authors     = ['Hugo Chevalier']
   s.email       = ['drakhaine@gmail.com']
-  s.homepage    = 'http://www.test.com'
+  s.homepage    = 'https://github.com/hchevalier/static_record'
   s.date        = '2016-12-28'
   s.summary     = 'Static immutable records gem'
   s.description = <<-EOF
     StaticRecord is a module allowing to perform ActiveRecord-like queries
-    over ruby files.
+    over Ruby files.
     Those act as immutable database records that only developers can alter.
     Their attributes are stored in a SQLite3 database re-created on startup.
     Queries instantiate each retrieved records.
@@ -29,9 +29,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '~> 4.2.0'
   # Database
-  s.add_dependency 'sqlite3'
+  s.add_dependency 'sqlite3', '=1.3.12'
   # Tests
-  s.add_development_dependency 'rspec', '= 3.5.0'
+  s.add_development_dependency 'rspec', '=3.5.0'
   s.add_development_dependency 'rspec-rails', '=3.5.2'
   # Coding style
   s.add_development_dependency 'rubocop', '=0.46.0'
