@@ -1,6 +1,6 @@
 = StaticRecord
 
-{<img src="https://badge.fury.io/rb/static-record.svg" alt="Gem Version" />}[https://badge.fury.io/rb/static-record] {<img src="https://codeclimate.com/github/hchevalier/static_record/badges/gpa.svg" />}[https://codeclimate.com/github/hchevalier/static_record]
+{<img src="https://badge.fury.io/rb/static-record.svg" alt="Gem Version" />}[https://badge.fury.io/rb/static-record] {<img src="https://codeclimate.com/github/hchevalier/static_record/badges/gpa.svg" />}[https://codeclimate.com/github/hchevalier/static_record] {<img src="https://travis-ci.org/hchevalier/static_record.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/hchevalier/static_record]
 
 StaticRecord allows you to perform ActiveRecord-like queries over ruby files.
 

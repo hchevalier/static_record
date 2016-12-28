@@ -29,10 +29,11 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '~> 4.2.0'
   # Database
-  s.add_dependency 'sqlite3', '=1.3.12'
+  s.add_dependency 'sqlite3', '~> 1.3'
   # Tests
-  s.add_development_dependency 'rspec', '=3.5.0'
-  s.add_development_dependency 'rspec-rails', '=3.5.2'
+  s.add_development_dependency 'rake', '~> 12.0.0'
+  s.add_development_dependency 'rspec', '~> 3.5'
+  s.add_development_dependency 'rspec-rails', '~> 3.5'
   # Coding style
-  s.add_development_dependency 'rubocop', '=0.46.0'
+  s.add_development_dependency 'rubocop', '~> 0.46.0'
 end
