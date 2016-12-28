@@ -12,7 +12,7 @@ You can use it when you need several files inheriting a base class.
 
 Add this to your Gemfile:
 
-  gem 'static_record', require: 'static_record'
+  gem 'static-record', require: 'static_record'
 
 and run the bundle install command.
 
