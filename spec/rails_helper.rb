@@ -6,6 +6,7 @@ require 'spec_helper'
 require 'rspec/rails'
 
 ActiveRecord::Migration.maintain_test_schema!
+require 'helpers/migration_has_been_run'
 
 RSpec.configure do |config|
   config.fixture_path = "#{::Rails.root}/spec/fixtures"

@@ -48,7 +48,7 @@ module StaticRecord
     end
 
     def respond_to_missing?(method_sym, include_private = false)
-      include_private ? super : respond_to?(method_sym, include_private)
+      include_private ? super : respond_to?(method_sym, true)
     end
 
     private

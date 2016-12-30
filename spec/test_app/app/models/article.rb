@@ -3,7 +3,8 @@ class Article < StaticRecord::Base
   path        Rails.root.join('app', 'models', 'articles', '**', '*.rb')
   primary_key :name
 
-  columns     name:   :string,
-              author: :string,
-              rank:   :integer
+  columns     name:       :string,
+              author:     :string,
+              rank:       :integer,
+              important:  :boolean
 end

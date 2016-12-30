@@ -105,6 +105,39 @@ Records are being assigned an ID in the SQLite3 database when inserted.
 
 As the database is recreated at each application startup and IDs depend on the insertion order, I advise you to rely on another column if you want to hardcode a specific record somewhere in your app.
 
+== References
+
+A migration helper allows your ActiveRecord models to reference a StaticRecord.
+
+In a migration, use:
+
+  def change
+    bind_static_record :users, :article
+  end
+
+In your model, you can use
+
+  has_static_record :article
+
+You can now do
+
+  u = User.first
+  u.article = Article.find('Article One')
+  u.save
+
+  u = User.first
+  u.article
+
+If you don't want to name your column with the same name than your StaticRecord base, you can do as follow
+
+  # In the migration
+  def change
+    bind_static_record :users, :any_column_name
+  end
+
+  # In the model
+  has_static_record :any_column_name, class_name: 'Article'
+
 == Questions?
 
 If you have any question or doubt regarding StaticRecord which you cannot find the solution to in the documentation, you can send me an email. I'll try to answer in less than 24 hours.

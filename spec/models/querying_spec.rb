@@ -1,7 +1,18 @@
 require 'spec_helper'
 require 'rails_helper'
 
-RSpec.describe StaticRecord::Querying, :type => :model do
+RSpec.describe StaticRecord::Querying, :type => :module do
+  it 'responds to \'ActiveRecord\' methods through StaticRecord::Relation' do
+    expect(Article.methods.include?(:where)).to be false
+    expect(Article.respond_to?(:where)).to be true
+    expect(Article.respond_to_missing?(:where)).to be true
+  end
+
+  it 'asks superclass for other methods' do
+    expect(Article.respond_to?(:inexisting_method)).to be false
+    expect(Article.respond_to_missing?(:inexisting_method)).to be false
+  end
+
   it 'delegates requests to StaticRecord::Relation' do
     expect(Article.where(author: 'The author')).to be_a(StaticRecord::Relation)
   end

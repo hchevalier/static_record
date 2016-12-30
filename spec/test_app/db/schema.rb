@@ -11,6 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20161229011439) do
+
+  create_table "tests", force: :cascade do |t|
+    t.string "name"
+    t.string "article_static_record_type"
+  end
 
 end

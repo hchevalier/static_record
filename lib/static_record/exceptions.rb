@@ -3,4 +3,5 @@ module StaticRecord
   class ReservedAttributeName < RuntimeError; end
   class NoPrimaryKey < RuntimeError; end
   class UnkownType < RuntimeError; end
+  class ClassError < RuntimeError; end
 end

@@ -1,6 +1,8 @@
 RSpec.configure do |config|
   require 'simplecov'
-  SimpleCov.start
+  SimpleCov.start do
+    add_filter '/spec/'
+  end
 
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
