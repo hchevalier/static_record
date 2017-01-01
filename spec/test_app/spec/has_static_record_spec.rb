@@ -15,8 +15,13 @@ RSpec.describe StaticRecord::HasStaticRecord, :type => :module do
     expect(t.article.name).to eql(article.name)
   end
 
+  it 'must assign correct instance' do
+    expect { Test.new.article = Article.last }.not_to raise_error
+    expect { Test.new.article = Role.last }.to raise_error(StaticRecord::ClassError)
+  end
+
   it 'cannot add getter to ActiveRecord if no primary key is set' do
     Test.has_static_record :role
-    expect { Test.new.role = Role.last }.to raise_error
+    expect { Test.new.role = Role.last }.to raise_error(StaticRecord::NoPrimaryKey)
   end
 end

@@ -18,17 +18,18 @@ module StaticRecord
 
       def define_setter(table_name, options)
         define_method("#{table_name}=") do |static_record|
-          unless static_record.class.pkey
-            err = "No primary key has been defined for #{static_record.class}"
-            raise NoPrimaryKey, err
-          end
-
           table = __method__.to_s.delete('=')
           options[:class_name] ||= table.camelize
           superklass = static_record.class.superclass
+
           unless superklass.to_s == options[:class_name]
-            err = "Record must be an instance of #{options[:class_name]}"
+            err = "Record must be an instance of #{options[:class_name]}, got #{superklass}"
             raise ClassError, err
+          end
+
+          unless superklass.pkey
+            err = "No primary key has been defined for #{superklass.class}"
+            raise NoPrimaryKey, err
           end
 
           send(:"#{table}_static_record_type=", static_record.class.name)
