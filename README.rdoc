@@ -146,12 +146,8 @@ If you have any question or doubt regarding StaticRecord which you cannot find t
 
 If you find a bug please add an issue on GitHub or fork the project and send a pull request.
 
-== Development
+== Future
 
-As StaticRecord is in active development and a full list of feature is already scheduled, I won't be accepting any feature-oriented pull requests before the 1.0.0 release (hopefully before mi-January).
-
-Here is what will be available soon:
 - Better documentation
-- Support for Date, Datetime and Foreign keys
-- Joins
 - Generators
+- Allow StaticRecord to reference other static records and add possibility to query over relations (joins)

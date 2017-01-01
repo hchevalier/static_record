@@ -67,14 +67,20 @@ module StaticRecord
     end
 
     def first(amount = 1)
-      @order_by << { :"#{@primary_key}" => :asc } if @order_by.empty?
+      @order_by << { :"#{@primary_key}" => :asc } if @primary_key && @order_by.empty?
       take(amount)
     end
 
     def last(amount = 1)
-      @order_by << { :"#{@primary_key}" => :desc } if @order_by.empty?
-      res = take(amount)
-      res.reverse! if res.is_a?(Array)
+      if !@primary_key && @order_by.empty?
+        cnt = self.class.new(self, store: @store, primary_key: @primary_key).no_sql.send(:count)
+        @sql_offset = [cnt - amount, 0].max
+        res = take(amount)
+      else
+        @order_by << { :"#{@primary_key}" => :desc } if @order_by.empty?
+        res = take(amount)
+        res.reverse! if res.is_a?(Array)
+      end
       res
     end
 
@@ -104,6 +110,11 @@ module StaticRecord
 
     def see_sql_of
       @only_sql = true
+      self
+    end
+
+    def no_sql
+      @only_sql = false
       self
     end
 
