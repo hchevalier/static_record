@@ -22,8 +22,6 @@ module StaticRecord
     end
 
     def sql_order
-      return '' unless @primary_key
-
       ord_sql = ''
       @order_by.each do |ord|
         ord_sql += ord_sql.empty? ? ' ORDER BY' : ', '

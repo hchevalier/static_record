@@ -85,12 +85,22 @@ RSpec.describe StaticRecord::Relation, :type => :model do
         expect(Article.last.class).to eql(ArticleTwo)
         expect(Article.see_sql_of.last).to eql("SELECT * FROM articles ORDER BY articles.name DESC LIMIT 1")
       end
+
+      it 'returns use default sort when no primary key has been defined' do
+        expect(Role.last.class).to eql(RoleTwo)
+        expect(Role.see_sql_of.last).to eql("SELECT * FROM roles LIMIT 1 OFFSET #{Role.all.count - 1}")
+      end
     end
 
     context 'with a parameter' do
       it 'orders records by primary key and returns up to specified number of records from the end' do
         expect(Article.last(2).map(&:class)).to eql([ArticleThree, ArticleTwo])
         expect(Article.see_sql_of.last(2)).to eql("SELECT * FROM articles ORDER BY articles.name DESC LIMIT 2")
+      end
+
+      it 'returns up to specified number of records from the end when no primary key is set' do
+        expect(Role.last(2).map(&:class)).to eql([RoleOne, RoleTwo])
+        expect(Role.see_sql_of.last(2)).to eql("SELECT * FROM roles LIMIT 2 OFFSET #{Role.all.count - 2}")
       end
     end
   end
