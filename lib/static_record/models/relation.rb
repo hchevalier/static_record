@@ -9,7 +9,7 @@ module StaticRecord
                 :order_by,
                 :only_sql
 
-    include Predicates
+    include StaticRecord::QueryInterface::Interface
     include StaticRecord::QueryBuildingConcern
 
     def initialize(previous_node, params)
