@@ -14,9 +14,16 @@ require 'static_record/models/querying'
 require 'static_record/models/relation'
 require 'static_record/models/base'
 
-require 'static_record/migrations/schema'
-require 'static_record/migrations/railtie'
 require 'static_record/migrations/has_static_record'
 
-module StaticRecord # :nodoc:
+# This ClassMethods module will be extended by ActiveRecord
+module StaticRecord
+  module ClassMethods # :nodoc:
+    def has_static_record(name, options = nil)
+      HasStaticRecord.define_on(self, name, options || {})
+    end
+  end
 end
+
+require 'static_record/migrations/schema'
+require 'static_record/migrations/railtie'

@@ -1,52 +1,55 @@
 module StaticRecord
   # Provides has_static_record when included
-  module HasStaticRecord
-    def self.included(base)
-      base.extend(ClassMethods)
+  class HasStaticRecord
+    def self.define_on(klass, name, options)
+      new(klass, name, options).define
     end
 
-    module ClassMethods # :nodoc:
-      def has_static_record(table_name, options = nil)
-        options ||= {}
-        class_eval do
-          define_setter(table_name, options)
-          define_getter(table_name, options)
-        end
+    def initialize(klass, name, options)
+      @klass = klass
+      @name = name
+      @options = options
+    end
+
+    def define
+      define_getter
+      define_setter
+    end
+
+    private
+
+    def define_getter
+      name = @name
+      options = @options
+      @klass.send :define_method, @name do
+        record_type = send(:"#{name}_static_record_type")
+        return nil unless record_type
+
+        options[:class_name] ||= name.to_s.camelize
+        # eager loading may be disabled, initialize parent class
+        superklass = options[:class_name].constantize
+        superklass.find_by(klass: record_type)
       end
+    end
 
-      private
+    def define_setter
+      name = @name
+      options = @options
+      @klass.send :define_method, "#{@name}=" do |static_record|
+        options[:class_name] ||= name.to_s.camelize
+        superklass = static_record.class.superclass
 
-      def define_setter(table_name, options)
-        define_method("#{table_name}=") do |static_record|
-          table = __method__.to_s.delete('=')
-          options[:class_name] ||= table.camelize
-          superklass = static_record.class.superclass
-
-          unless superklass.to_s == options[:class_name]
-            err = "Record must be an instance of #{options[:class_name]}, got #{superklass}"
-            raise ClassError, err
-          end
-
-          unless superklass.pkey
-            err = "No primary key has been defined for #{superklass.class}"
-            raise NoPrimaryKey, err
-          end
-
-          send(:"#{table}_static_record_type=", static_record.class.name)
+        unless superklass.to_s == options[:class_name]
+          err = "Record must be an instance of #{options[:class_name]}, got #{superklass}"
+          raise ClassError, err
         end
-      end
 
-      def define_getter(table_name, options)
-        define_method(table_name) do
-          table = __method__.to_s
-          record_type = send(:"#{table}_static_record_type")
-          return nil unless record_type
-
-          options[:class_name] ||= table.camelize
-          # eager loading may be disabled, initialize parent class
-          superklass = options[:class_name].constantize
-          superklass.find_by(klass: record_type)
+        unless superklass.pkey
+          err = "No primary key has been defined for #{superklass.class}"
+          raise NoPrimaryKey, err
         end
+
+        send(:"#{name}_static_record_type=", static_record.class.name)
       end
     end
   end

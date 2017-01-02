@@ -45,6 +45,10 @@ module StaticRecord
       end
 
       def insert_into_database(db, record, index, cols)
+        # TODO: get attributes without instantiating the record
+        # that currently forces to declare base file (ex: badge.rb) columns
+        # at the end of file, without what Badge instance methods are not defined
+        # yet during BadgeOne#initialize
         attrs = record.constantize.new.attributes
         # id, klass
         sqlized = [index.to_s, "'#{record}'"]
