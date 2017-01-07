@@ -4,7 +4,7 @@ module StaticRecord
     # Contains search modifiers
     module SearchModifiers
       private
-    
+
       def limit(amount)
         @sql_limit = amount
         self

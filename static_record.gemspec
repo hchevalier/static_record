@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Hugo Chevalier']
   s.email       = ['drakhaine@gmail.com']
   s.homepage    = 'https://github.com/hchevalier/static_record'
-  s.date        = '2016-12-28'
+  s.date        = '2016-01-07'
   s.summary     = 'Static immutable records gem'
   s.description = <<-EOF
     StaticRecord is a module allowing to perform ActiveRecord-like queries

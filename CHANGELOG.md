@@ -1,3 +1,10 @@
+## 1.1.0 (2017-01-07)
+
+Features:
+
+  - add possibility to add default values to StaticRecord attributes
+  - add possibility to override defined values of StaticRecord attributes
+
 ## 1.0.1 (2017-01-02)
 
 Fixes:

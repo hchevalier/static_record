@@ -67,7 +67,7 @@ module StaticRecord
         next if RESERVED_ATTRIBUTES.include?(var)
         attrs[var.to_s.sub(/@@/, '').to_sym] = klass.class_variable_get(var)
       end
-      attrs
+      default_attributes(attrs)
     end
 
     def self.columns(cols)
@@ -77,6 +77,32 @@ module StaticRecord
 
     def self.get_column_type(column)
       class_variable_get(:@@_columns)[column]
+    end
+
+    private
+
+    def default_attributes(attrs)
+      klass = self.class
+      klass.class_variable_get(:@@_columns).each do |column, _ctype|
+        column_defined = attrs.key?(column)
+        unless column_defined || default?(column)
+          err = "You must define attribute '#{column}' for #{klass.name}"
+          raise StaticRecord::MissingAttribute, err
+        end
+
+        v = column_defined ? attrs[column] : klass.send(:"default_#{column}")
+        v = klass.send(:"override_#{column}", v) if override?(column)
+        attrs[column] = v
+      end
+      attrs
+    end
+
+    def default?(column)
+      self.class.respond_to?("default_#{column}")
+    end
+
+    def override?(column)
+      self.class.respond_to?("override_#{column}")
     end
   end
 end

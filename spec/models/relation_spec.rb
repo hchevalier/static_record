@@ -10,7 +10,7 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
   context '.all' do
     it 'returns all results' do
-      expect(Article.all.count).to eql(4)
+      expect(Article.all.count).to eql(5)
       expect(Article.see_sql_of.all).to eql("SELECT * FROM articles")
     end
   end
@@ -18,7 +18,7 @@ RSpec.describe StaticRecord::Relation, :type => :model do
   context '.order' do
     context 'with a symbol' do
       it 'returns results ordered' do
-        expected = [ArticleFour, ArticleOne, ArticleThree, ArticleTwo]
+        expected = [ArticleFive, ArticleFour, ArticleOne, ArticleThree, ArticleTwo]
         expect(Article.order(:name).all.map(&:class)).to eql(expected)
         expect(Article.order(:name).to_sql).to eql("SELECT * FROM articles ORDER BY articles.name ASC")
       end
@@ -26,7 +26,7 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
     context 'with a string' do
       it 'returns results ordered' do
-        expected = [ArticleTwo, ArticleThree, ArticleOne, ArticleFour]
+        expected = [ArticleTwo, ArticleThree, ArticleOne, ArticleFour, ArticleFive]
         expect(Article.order("name DESC").all.map(&:class)).to eql(expected)
         expect(Article.order("name DESC").to_sql).to eql("SELECT * FROM articles ORDER BY name DESC")
       end
@@ -34,13 +34,13 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
     context 'with a hash' do
       it 'returns results ordered with one key' do
-        expected = [ArticleFour, ArticleOne, ArticleThree, ArticleTwo]
+        expected = [ArticleFive, ArticleFour, ArticleOne, ArticleThree, ArticleTwo]
         expect(Article.order(name: :asc).all.map(&:class)).to eql(expected)
         expect(Article.order(name: :asc).to_sql).to eql("SELECT * FROM articles ORDER BY articles.name ASC")
       end
 
       it 'returns results ordered with serveral keys' do
-        expected = [ArticleThree, ArticleOne, ArticleTwo, ArticleFour]
+        expected = [ArticleThree, ArticleOne, ArticleTwo, ArticleFour, ArticleFive]
         expect(Article.order(rank: :asc, name: :desc).all.map(&:class)).to eql(expected)
         expect(Article.order(rank: :asc, name: :desc).to_sql).to eql("SELECT * FROM articles ORDER BY articles.rank ASC, articles.name DESC")
       end
@@ -48,13 +48,13 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
     context 'with an array' do
       it 'returns results ordered with one key' do
-        expected = [ArticleFour, ArticleOne, ArticleThree, ArticleTwo]
+        expected = [ArticleFive, ArticleFour, ArticleOne, ArticleThree, ArticleTwo]
         expect(Article.order([:name]).all.map(&:class)).to eql(expected)
         expect(Article.order([:name]).to_sql).to eql("SELECT * FROM articles ORDER BY articles.name ASC")
       end
 
       it 'returns results ordered with several keys' do
-        expected = [ArticleThree, ArticleOne, ArticleFour, ArticleTwo]
+        expected = [ArticleThree, ArticleOne, ArticleFive, ArticleFour, ArticleTwo]
         expect(Article.order([:rank, :name]).all.map(&:class)).to eql(expected)
         expect(Article.order([:rank, :name]).to_sql).to eql("SELECT * FROM articles ORDER BY articles.rank ASC, articles.name ASC")
       end
@@ -64,14 +64,14 @@ RSpec.describe StaticRecord::Relation, :type => :model do
   context '.first' do
     context 'without parameter' do
       it 'returns first record ordered by primary key' do
-        expect(Article.first.class).to eql(ArticleFour)
+        expect(Article.first.class).to eql(ArticleFive)
         expect(Article.see_sql_of.first).to eql("SELECT * FROM articles ORDER BY articles.name ASC LIMIT 1")
       end
     end
 
     context 'with a parameter' do
       it 'orders records by primary key and returns up to specified number of records from the beginning' do
-        expect(Article.first(2).map(&:class)).to eql([ArticleFour, ArticleOne])
+        expect(Article.first(2).map(&:class)).to eql([ArticleFive, ArticleFour])
         expect(Article.see_sql_of.first(2)).to eql("SELECT * FROM articles ORDER BY articles.name ASC LIMIT 2")
       end
     end
@@ -107,14 +107,14 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
   context '.limit' do
     it 'returns up to specified number of records' do
-      expect(Article.limit(2).all.map(&:class)).to eql([ArticleFour, ArticleOne])
+      expect(Article.limit(2).all.map(&:class)).to eql([ArticleFive, ArticleFour])
       expect(Article.limit(2).to_sql).to eql("SELECT * FROM articles LIMIT 2")
     end
   end
 
   context '.limit.offset' do
     it 'returns up to specified number of records with specified offset' do
-      expect(Article.limit(2).offset(1).all.map(&:class)).to eql([ArticleOne, ArticleThree])
+      expect(Article.limit(2).offset(1).all.map(&:class)).to eql([ArticleFour, ArticleOne])
       expect(Article.limit(2).offset(1).to_sql).to eql("SELECT * FROM articles LIMIT 2 OFFSET 1")
     end
   end

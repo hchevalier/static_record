@@ -3,4 +3,5 @@ class ArticleOne < Article
   attribute :author, 'The author'
   attribute :rank, 2
   attribute :important, false
+  attribute :cover, Rails.root.join('public', 'articles', 'cover', 'article_one.jpg')
 end
