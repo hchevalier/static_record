@@ -37,14 +37,14 @@ Create your base class inheriting from StaticRecord::Base.
     primary_key :name
 
     # You can specify default values for each column of your static records
-    # Just create a method with name: default_<attribute_name>
-    def default_author
+    # Just create a class method with name: default_<attribute_name>
+    def self.default_author
       'Default author'
     end
 
     # You can override any attribute value
-    # Just create a method with name: override_<attribute_name>
-    def override_cover(cover)
+    # Just create a class method with name: override_<attribute_name>
+    def self.override_cover(cover)
       return cover if cover.to_s.include?('/')
       Rails.root.join('public', 'default_cover_path', cover)
     end
