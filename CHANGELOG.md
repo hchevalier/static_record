@@ -1,3 +1,10 @@
+## 1.2.0 (2017-01-08)
+
+Features:
+
+  - add possibility to reference StaticRecords from another one
+  - handle joins method to query over StaticRecord jointures
+
 ## 1.1.0 (2017-01-07)
 
 Features:
