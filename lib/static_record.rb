@@ -1,8 +1,10 @@
 require 'static_record/engine'
 require 'static_record/exceptions'
 
+require 'static_record/concerns/getters_setters_concern'
 require 'static_record/concerns/query_building_concern'
 require 'static_record/concerns/sqlite_storing_concern'
+require 'static_record/concerns/request_execution_concern'
 
 require 'static_record/models/query_interface/conditioners'
 require 'static_record/models/query_interface/retrievers'

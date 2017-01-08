@@ -5,6 +5,12 @@ module StaticRecord
     module SearchModifiers
       private
 
+      def joins(joint)
+        joint = joint.store unless [String, Symbol].include?(joint.class)
+        @joins_clauses << joint
+        self
+      end
+
       def limit(amount)
         @sql_limit = amount
         self

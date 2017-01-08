@@ -5,6 +5,7 @@ module StaticRecord
 
     def build_query
       sql = sql_select_from
+      sql += sql_joins unless @joins_clauses.empty?
       sql += sql_where unless @where_clauses.empty?
       sql += sql_order unless @order_by.empty?
       sql += sql_limit_offset if @sql_limit
@@ -15,6 +16,13 @@ module StaticRecord
 
     def sql_select_from
       "SELECT #{@columns} FROM #{@table}"
+    end
+
+    def sql_joins
+      @joins_clauses.map do |joint|
+        " INNER JOIN #{joint} ON "\
+        "#{@store}.#{get_column_for_static_table(joint)} = #{joint}.klass"
+      end.join
     end
 
     def sql_where
@@ -70,14 +78,14 @@ module StaticRecord
         if value.is_a?(Array)
           # ex: where(name: ['John', 'Jack'])
           # use IN operator
-          value.map! { |v| v =~ /^\d+$/ ? v : "\"#{v}\"" }
+          value.map! { |v| cast(v) }
           inverse = 'NOT ' if clause[:operator] == :not_eq
           "#{key} #{inverse}IN (#{value.join(',')})"
         else
           # ex: where(name: 'John')
           # use = operator
           inverse = '!' if clause[:operator] == :not_eq
-          "#{key} #{inverse}= '#{value}'"
+          "#{key} #{inverse}= #{cast(value)}"
         end
       end
       parts.join(' AND ')
@@ -89,16 +97,32 @@ module StaticRecord
         # Anon parameters
         # ex: where("name = ? OR name = ?", 'John', 'Jack')
         clause[:parameters].each do |param|
-          final_string.sub!(/\?/, "\"#{param}\"")
+          final_string.sub!(/\?/, cast(param))
         end
       elsif clause[:parameters].is_a?(Hash)
         # Named parameters (placeholder condition)
         # ex: where("name = :one OR name = :two", one: 'John', two: 'Smith')
         clause[:parameters].each do |key, value|
-          final_string.sub!(":#{key}", "\"#{value}\"")
+          final_string.sub!(":#{key}", cast(value))
         end
       end
       final_string
+    end
+
+    def cast(value)
+      return escape(value.class.name) if value.class < StaticRecord::Base
+      return value.to_s if value =~ /^[+|-]?\d+\.?\d*$/
+      escape(value)
+    end
+
+    def escape(value)
+      return "'#{value}'" unless value.include?('\'')
+      "\"#{value}\""
+    end
+
+    def get_column_for_static_table(table)
+      klass = @klass.constantize
+      klass.bound_static_tables[table.to_sym]
     end
   end
 end

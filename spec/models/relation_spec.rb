@@ -141,7 +141,7 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
     it 'accepts array of values' do
       expect(Article.where(name: ['Article One', 'Article Two']).to_a.size).to eql(2)
-      expect(Article.where(name: ['Article One', 'Article Two']).to_sql).to eql("SELECT * FROM articles WHERE name IN (\"Article One\",\"Article Two\")")
+      expect(Article.where(name: ['Article One', 'Article Two']).to_sql).to eql("SELECT * FROM articles WHERE name IN ('Article One','Article Two')")
     end
 
     it 'accepts strings' do
@@ -151,17 +151,17 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
     it 'accepts strings followed by an anonymous parameters' do
       expect(Article.where("name = ?", 'Article Two').first.class).to eql(ArticleTwo)
-      expect(Article.where("name = ?", 'Article Two').to_sql).to eql("SELECT * FROM articles WHERE name = \"Article Two\"")
+      expect(Article.where("name = ?", 'Article Two').to_sql).to eql("SELECT * FROM articles WHERE name = 'Article Two'")
     end
 
     it 'accepts strings followed by several anonymous parameters' do
       expect(Article.where("name = ? AND author = ?", 'Article Two', 'The author').first.class).to eql(ArticleTwo)
-      expect(Article.where("name = ? AND author = ?", 'Article Two', 'The author').to_sql).to eql("SELECT * FROM articles WHERE name = \"Article Two\" AND author = \"The author\"")
+      expect(Article.where("name = ? AND author = ?", 'Article Two', 'The author').to_sql).to eql("SELECT * FROM articles WHERE name = 'Article Two' AND author = 'The author'")
     end
 
     it 'accepts strings followed by a hash of named parameters' do
       expect(Article.where("name = :name AND author = :author", {name: 'Article Two', author: 'The author'}).first.class).to eql(ArticleTwo)
-      expect(Article.where("name = :name AND author = :author", {name: 'Article Two', author: 'The author'}).to_sql).to eql("SELECT * FROM articles WHERE name = \"Article Two\" AND author = \"The author\"")
+      expect(Article.where("name = :name AND author = :author", {name: 'Article Two', author: 'The author'}).to_sql).to eql("SELECT * FROM articles WHERE name = 'Article Two' AND author = 'The author'")
     end
   end
 
@@ -178,7 +178,7 @@ RSpec.describe StaticRecord::Relation, :type => :model do
     it 'is possible to chain where.not and where.not clauses' do
       request = Article.where.not(author: ['The author', 'Me']).where.not(name: 'Article Two')
       expect(request.last.class.name).to eql(ArticleThree.name)
-      expect(request.to_sql).to eql("SELECT * FROM articles WHERE author NOT IN (\"The author\",\"Me\") AND name != 'Article Two'")
+      expect(request.to_sql).to eql("SELECT * FROM articles WHERE author NOT IN ('The author','Me') AND name != 'Article Two'")
     end
   end
 
@@ -207,7 +207,7 @@ RSpec.describe StaticRecord::Relation, :type => :model do
 
     it 'accepts array of values' do
       expect(Article.find(['Article One', 'Article Two']).to_a.size).to eql(2)
-      expect(Article.see_sql_of.find(['Article One', 'Article Two'])).to eql("SELECT * FROM articles WHERE name IN (\"Article One\",\"Article Two\")")
+      expect(Article.see_sql_of.find(['Article One', 'Article Two'])).to eql("SELECT * FROM articles WHERE name IN ('Article One','Article Two')")
     end
 
     context 'one value' do
@@ -247,6 +247,15 @@ RSpec.describe StaticRecord::Relation, :type => :model do
     it 'allows to use the SQL OR' do
       expect(Article.where(author: 'Inexisting author').or.where(author: 'The author').size).to eql(2)
       expect(Article.where(author: 'Inexisting author').or.where(author: 'The author').to_sql).to eql("SELECT * FROM articles WHERE author = 'Inexisting author' OR author = 'The author'")
+    end
+  end
+
+  context '.joins' do
+    it 'allows to use the SQL JOIN clause' do
+      expect(Article.joins(:categories).where("categories.name = 'Category One'").first.class).to eql(ArticleOne)
+      expected_sql = "SELECT * FROM articles INNER JOIN categories ON articles.category = categories.klass"
+      expect(Article.joins(:categories).to_sql).to eql(expected_sql)
+      expect(Article.joins(Category).to_sql).to eql(expected_sql)
     end
   end
 end

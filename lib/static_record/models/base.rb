@@ -1,6 +1,7 @@
 module StaticRecord
   # Class that immutable model instances can inherit from
   class Base
+    include StaticRecord::GettersSettersConcern
     include StaticRecord::Querying
     include StaticRecord::SqliteStoringConcern
 
@@ -8,14 +9,16 @@ module StaticRecord
       :@@_columns,
       :@@_primary_key,
       :@@_path_pattern,
-      :@@_store
+      :@@_store,
+      :@@_bound_static_tables
     ].freeze
 
     KNOWN_TYPES = [
       :string,
       :boolean,
       :integer,
-      :float
+      :float,
+      :static_record
     ].freeze
 
     def initialize
@@ -34,30 +37,15 @@ module StaticRecord
       class_variable_set("@@#{name}", value)
     end
 
-    def self.primary_key(name)
-      err = RESERVED_ATTRIBUTES.include?("@@#{name}".to_sym)
-      raise StaticRecord::ReservedAttributeName, "#{name} is a reserved name" if err
-      class_variable_set('@@_primary_key', name)
-    end
-
-    def self.pkey
-      class_variable_defined?(:@@_primary_key) ? class_variable_get('@@_primary_key') : nil
-    end
-
-    def self.table(store)
-      class_variable_set('@@_store', store.to_s)
-    end
-
-    def self.store
-      class_variable_get('@@_store')
-    end
-
-    def self.path(path)
-      class_variable_set('@@_path_pattern', path)
-    end
-
-    def self.path_pattern
-      class_variable_get('@@_path_pattern')
+    def self.reference(name, value)
+      attribute(name, value)
+      unless value.class < StaticRecord::Base
+        err = 'Reference only accepts StaticRecords'
+        raise StaticRecord::ClassError, err
+      end
+      tables = superclass.bound_static_tables
+      tables[value.class.store.to_sym] = name
+      superclass.bound_static_tables = tables
     end
 
     def attributes

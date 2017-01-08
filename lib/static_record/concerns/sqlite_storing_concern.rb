@@ -8,7 +8,7 @@ module StaticRecord
       def create_store
         cols = class_variable_get(:@@_columns)
         begin
-          dbname = Rails.root.join('db', "static_#{store}.sqlite3").to_s
+          dbname = Rails.root.join('db', 'static_records.sqlite3').to_s
           SQLite3::Database.new(dbname)
           db = SQLite3::Database.open(dbname)
           db.execute("DROP TABLE IF EXISTS #{store}")
@@ -37,7 +37,7 @@ module StaticRecord
 
       def column_type_to_sql(ctype)
         case ctype.to_s
-        when 'string'
+        when 'string', 'static_record'
           ' TEXT'
         else
           " #{ctype.to_s.upcase}"
@@ -54,7 +54,14 @@ module StaticRecord
         sqlized = [index.to_s, "'#{record}'"]
         # model's attributes
         sqlized += cols.map do |name, ctype|
-          ctype == :integer ? attrs[name].to_s : "'#{attrs[name]}'"
+          case ctype
+          when :integer
+            attrs[name].to_s
+          when :static_record
+            "'#{attrs[name].class.name}'"
+          else
+            "'#{attrs[name]}'"
+          end
         end
 
         db.execute("INSERT INTO #{store} VALUES(#{sqlized.join(', ')})")

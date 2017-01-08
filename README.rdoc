@@ -26,7 +26,7 @@ The 'require' part is important so that Rails autoloads the library correctly.
 Create your base class inheriting from StaticRecord::Base.
 
   class Article < StaticRecord::Base
-    # Declare in which SQLite3 file "articles" will be store (db/static_<table>.sqlite3)
+    # Declare in which table Articles will be store (always in file db/static_records.sqlite3)
     table       :articles
 
     # Declare at which path "article" files can be found
@@ -50,10 +50,11 @@ Create your base class inheriting from StaticRecord::Base.
     end
 
     # Specify which "article" attributes can be queried over with their types
-    columns     name:   :string,
-                author: :string,
-                rank:   :integer,
-                cover:  :string
+    columns     name:     :string,
+                author:   :string,
+                rank:     :integer,
+                cover:    :string,
+                category  :static_record
   end
 
 At each application startup, an SQLite3 database will be created to store this class' children.
@@ -63,6 +64,7 @@ Available column types are
 - :integer
 - :boolean
 - :float
+- :static_record
 
 === Child class
 
@@ -74,6 +76,10 @@ Create has many child class as you want.
     attribute :author, 'The author'
     attribute :rank, 2
     attribute :cover, Rails.root.join('public', 'articles', 'one.jpg')
+
+    # Define the references to other StaticRecords
+    # These ones can be queried over after a jointure
+    reference :category, Category.find('Category One')
 
     # Your class can be used as any other Ruby class
     def initialize
@@ -94,25 +100,51 @@ In your code, you can perform queries like this one:
 
 Article.where(name: 'Article Two').or.where('rank >= 2').limit(2).offset(3)
 
-I tried to implement as many SQL functions wrappers that ActiveRecord provides as I could.
+I tried to implement as much of ActiveRecord's query interface as I could.
 
-There is still a lot of work before everything is available, but I chose to release the 1.0.0.pre nevertheless.
+There is still a lot of work before everything is available, but I chose to release the gem nevertheless.
 
 Here is a full list:
 * where
-  * supports Hash -> where(name: 'Name', author: 'Author')
-  * supports String -> where("name = 'Name'") or where("name = ?", 'Name') or where("name = :name", name: 'Name')
+  * Article.where(name: 'Article One', author: 'The author')
+  * Article.where(name: ['Article One', 'Article Two'])
+  * Article.where(name: 'Article One').where(author: 'The author')
+  * Article.where("name = 'Article One'")
+  * Article.where("name = ?", 'Article One')
+  * Article.where("name = :name", name: 'Article One')
 * find (only if a primary key has been set)
+  * Article.find('Article One')
 * find_by
+  * Article.find_by(author: 'The author')
+* joins
+  * Article.joins(:categories).where("categories.name = 'Category One'")
 * not
+  * Article.where.not(author: 'The author')
 * or
+  * Article.where(author: 'The author').or.where(author: 'Another author')
+  * Article.where.not(name: 'Article One').or.where.not(author: 'The author')
 * all
+  * Article.where(author: 'The author').all
+  * Article.all
 * take
+  * Article.take
+  * Article.take(3)
 * first
+  * Article.first
+  * Article.first(3)
 * last
+  * Article.last
+  * Article.last(3)
 * limit
+  * Article.limit(5)
 * offset
+  * Article.limit(3).offset(2)
 * order
+  * Article.order(:rank) # Use ASC ordering
+  * Article.order([:rank, :name]) # Use ASC ordering for both columns
+  * Article.order(rank: :asc)
+  * Article.order(rank: :desc, name: :asc)
+  * Article.order("rank DESC")
 
 == IDs
 
@@ -121,6 +153,8 @@ Records are being assigned an ID in the SQLite3 database when inserted.
 As the database is recreated at each application startup and IDs depend on the insertion order, I advise you to rely on another column if you want to hardcode a specific record somewhere in your app.
 
 == References
+
+=== ActiveRecord
 
 A migration helper allows your ActiveRecord models to reference a StaticRecord.
 
@@ -153,6 +187,32 @@ If you don't want to name your column with the same name than your StaticRecord 
   # In the model
   has_static_record :any_column_name, class_name: 'Article'
 
+=== StaticRecord
+
+You can also use 'reference' instead of 'attribute' to have your StaticRecords reference other ones.
+
+You must use type :static_record when declaring your column!
+
+  class Article < StaticRecord::Base
+    table       :articles
+    path        Rails.root.join('app', 'models', 'articles', '**', '*.rb')
+    primary_key :name
+
+    columns     name:     :string,
+                category  :static_record
+  end
+
+  class ArticleOne < Article
+    attribute   :name, 'Article one'
+    reference   :category, Category.find('Category One')
+  end
+
+You can query them like this
+
+  Article.where(category: Category.find('Category One'))
+  Article.joins(Category).where("categories.name = 'Category One'")
+  Article.joins("categories").where("categories.name = 'Category One'")
+
 == Questions?
 
 If you have any question or doubt regarding StaticRecord which you cannot find the solution to in the documentation, you can send me an email. I'll try to answer in less than 24 hours.
@@ -165,4 +225,4 @@ If you find a bug please add an issue on GitHub or fork the project and send a p
 
 - Better documentation
 - Generators
-- Allow StaticRecord to reference other static records and add possibility to query over relations (joins)
+- Improve jointures

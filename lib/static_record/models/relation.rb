@@ -4,6 +4,7 @@ module StaticRecord
                 :sql_limit,
                 :sql_offset,
                 :where_clauses,
+                :joins_clauses,
                 :chain,
                 :result_type,
                 :order_by,
@@ -11,16 +12,19 @@ module StaticRecord
 
     include StaticRecord::QueryInterface::Interface
     include StaticRecord::QueryBuildingConcern
+    include StaticRecord::RequestExecutionConcern
 
     def initialize(previous_node, params)
       @store = params[:store]
       @table = params[:store]
+      @klass = params[:klass]
       @primary_key = params[:primary_key]
 
       @columns = '*'
       @sql_limit = nil
       @sql_offset = nil
       @where_clauses = []
+      @joins_clauses = []
       @chain = :and
       @result_type = :array
       @order_by = []
@@ -31,7 +35,12 @@ module StaticRecord
 
     def method_missing(method_sym, *arguments, &block)
       if respond_to?(method_sym, true)
-        Relation.new(self, store: @store, primary_key: @primary_key).send(method_sym, *arguments, &block)
+        params = {
+          klass: @klass,
+          store: @store,
+          primary_key: @primary_key
+        }
+        Relation.new(self, params).send(method_sym, *arguments, &block)
       elsif [].respond_to?(method_sym)
         to_a.send(method_sym)
       else
@@ -58,6 +67,7 @@ module StaticRecord
       @sql_limit = relation.sql_limit
       @sql_offset = relation.sql_offset
       @where_clauses = relation.where_clauses.deep_dup
+      @joins_clauses = relation.joins_clauses.deep_dup
       @chain = relation.chain
       @result_type = relation.result_type
       @order_by = relation.order_by.deep_dup
@@ -73,51 +83,6 @@ module StaticRecord
 
       @where_clauses << clause
       @chain = :and
-    end
-
-    def exec_request(expectancy = :result_set)
-      return build_query if @only_sql
-
-      dbname = Rails.root.join('db', "static_#{@store}.sqlite3").to_s
-      result = get_expected_result_from_database(dbname, expectancy)
-      cast_result(expectancy, result)
-    end
-
-    def get_expected_result_from_database(dbname, expectancy)
-      result = nil
-
-      begin
-        db = SQLite3::Database.open(dbname)
-        if expectancy == :integer
-          result = db.get_first_value(build_query)
-        else
-          statement = db.prepare(build_query)
-          result_set = statement.execute
-          result = result_set.map { |row| row[1].constantize.new }
-        end
-      rescue SQLite3::Exception => e
-        error = e
-      ensure
-        statement.close if statement
-        db.close if db
-      end
-
-      raise error if error
-
-      result
-    end
-
-    def cast_result(expectancy, result)
-      if expectancy == :result_set
-        case @result_type
-        when :array
-          result = [] if result.nil?
-        when :record
-          result = result.empty? ? nil : result.first
-        end
-      end
-
-      result
     end
   end
 end
