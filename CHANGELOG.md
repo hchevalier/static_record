@@ -1,3 +1,9 @@
+## 1.2.1 (2017-01-09)
+
+Fixes:
+
+  - fix a crash when symbols are interpolated in SQL string
+
 ## 1.2.0 (2017-01-08)
 
 Features:

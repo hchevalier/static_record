@@ -116,7 +116,7 @@ module StaticRecord
     end
 
     def escape(value)
-      return "'#{value}'" unless value.include?('\'')
+      return "'#{value}'" unless value.to_s.include?('\'')
       "\"#{value}\""
     end
 
